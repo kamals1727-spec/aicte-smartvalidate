@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Design tokens — government-technology palette (navy primary on light paper).
+   Signature element: every finding carries a coloured provenance rail showing whether it
+   came from a deterministic rule, a live AI model, simulated demo output, or an officer. */
+@theme {
+  --color-navy-950: #0c1b33;
+  --color-navy-900: #13294b;
+  --color-navy-800: #1c3864;
+  --color-navy-700: #284b80;
+  --color-navy-100: #e3eaf5;
+  --color-navy-50: #f1f5fb;
+  --color-action: #2357c6;
+  --color-action-hover: #1b47a6;
+  --color-paper: #f5f7fa;
+  --color-ink: #1b2433;
+  --color-muted: #5b6676;
+  --color-line: #dfe4eb;
+  --color-ok: #1f7a4d;
+  --color-ok-bg: #e7f4ec;
+  --color-warn: #8a5300;
+  --color-warn-bg: #fdf1dc;
+  --color-bad: #b42318;
+  --color-bad-bg: #fdeceb;
+  --color-info: #1d5fa8;
+  --color-info-bg: #e6f0fb;
+  --color-demo: #6d4bb8;
+  --color-demo-bg: #f1ecfb;
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-action);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.prose-tight p + p {
+  margin-top: 0.5rem;
+}
