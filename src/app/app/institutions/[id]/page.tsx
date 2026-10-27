@@ -25,7 +25,7 @@ export default async function InstitutionDetail({ params }: { params: Promise<{ 
   const href = (aid: string) => (actor.role === "INSTITUTION" ? `/app/applications/${aid}` : `/app/review/${aid}`);
   return (
     <>
-      <PageHeader crumbs={actor.role === "INSTITUTION" ? undefined : [{ href: "/app/institutions", label: "Institutions" }, { label: inst.refId }]} title={inst.name} subtitle={`${inst.refId} · ${inst.city}, ${inst.state}`} actions={<Badge tone="neutral">Synthetic demo record</Badge>} />
+      <PageHeader crumbs={actor.role === "INSTITUTION" ? undefined : [{ href: "/app/institutions", label: "Institutions" }, { label: inst.refId }]} title={inst.name} subtitle={`${inst.refId} · ${inst.city}, ${inst.state}`} actions={<Badge tone="neutral">{inst.isSynthetic ? "Synthetic demo record" : "Self-registered"}</Badge>} />
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <Card title="Record">
           <DL
@@ -33,7 +33,7 @@ export default async function InstitutionDetail({ params }: { params: Promise<{ 
               ["Reference ID", inst.refId],
               ["Address", inst.address],
               ["Affiliated university / board", inst.affiliatedUniversity],
-              ["Approval status (synthetic)", inst.approvalStatus],
+              [inst.isSynthetic ? "Approval status (synthetic)" : "Approval status", inst.approvalStatus],
               ["Contact email", inst.contactEmail],
               ["Contact phone", inst.contactPhone],
             ]}

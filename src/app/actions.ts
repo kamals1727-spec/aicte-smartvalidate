@@ -9,7 +9,7 @@ import { ZodError } from "zod";
 import { requireActor, getActor } from "@/server/auth/actor";
 import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
 import { AppError, toSafeMessage } from "@/server/errors";
-import { login, recordLogout } from "@/server/services/auth";
+import { login, recordLogout, register } from "@/server/services/auth";
 import * as apps from "@/server/services/applications";
 import { removeDocument } from "@/server/services/documents";
 import { runValidation } from "@/server/services/validation";
@@ -44,18 +44,35 @@ function form(fd: FormData): Record<string, string> {
 
 // ── Auth ──
 
-export async function loginAction(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+async function clientIp(): Promise<string> {
   const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "local";
+}
+
+async function setSessionCookie(token: string) {
+  (await cookies()).set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SESSION_TTL_SECONDS,
+  });
+}
+
+export async function loginAction(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
   try {
-    const { token } = await login({ email: fd.get("email"), password: fd.get("password") }, ip);
-    (await cookies()).set(SESSION_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: SESSION_TTL_SECONDS,
-    });
+    const { token } = await login({ email: fd.get("email"), password: fd.get("password") }, await clientIp());
+    await setSessionCookie(token);
+  } catch (err) {
+    return fail(err);
+  }
+  redirect("/app");
+}
+
+export async function registerAction(_: ActionResult | null, fd: FormData): Promise<ActionResult> {
+  try {
+    const { token } = await register(form(fd), await clientIp());
+    await setSessionCookie(token);
   } catch (err) {
     return fail(err);
   }

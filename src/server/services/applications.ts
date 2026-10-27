@@ -44,6 +44,7 @@ export async function createApplication(actor: Actor, raw: unknown) {
     .where(and(eq(schema.categories.code, input.categoryCode), eq(schema.categories.active, true)))
     .limit(1);
   if (!cat) throw new AppError("Unknown or inactive application category.");
+  const [inst] = await db.select({ isSynthetic: schema.institutions.isSynthetic }).from(schema.institutions).where(eq(schema.institutions.id, actor.institutionId)).limit(1);
   const { categoryCode: _c, ...fields } = input;
   const correlationId = newCorrelationId();
   const refNo = appRef();
@@ -56,7 +57,7 @@ export async function createApplication(actor: Actor, raw: unknown) {
       categoryId: cat.id,
       status: "DRAFT",
       createdById: actor.id,
-      isSynthetic: true,
+      isSynthetic: inst?.isSynthetic ?? true,
     })
     .returning();
   await db.insert(schema.statusHistory).values({ applicationId: app.id, fromStatus: null, toStatus: "DRAFT", actorId: actor.id, reason: "Application created" });
