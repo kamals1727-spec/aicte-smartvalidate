@@ -32,7 +32,12 @@ export default async function LoginPage() {
             </Link>
           </div>
           <h1 className="font-serif text-2xl font-semibold text-navy-900">Sign in</h1>
-          <p className="mt-1 text-sm text-muted">Use one of the demo accounts below.</p>
+          <p className="mt-1 text-sm text-muted">
+            New applicant?{" "}
+            <Link href="/register" className="font-medium text-action hover:underline">
+              Register your institution
+            </Link>
+          </p>
           <LoginForm />
           {showDemo && (
             <div className="mt-8 rounded-lg border border-line bg-white p-4 text-sm">
