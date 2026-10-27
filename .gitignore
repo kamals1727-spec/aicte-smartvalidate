@@ -24,3 +24,5 @@ storage/
 npm-debug.log*
 coverage/
 .vercel
+
+.vercel
