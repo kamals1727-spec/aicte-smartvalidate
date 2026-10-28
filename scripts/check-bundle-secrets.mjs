@@ -13,9 +13,11 @@ const needles = [
   { name: "Google API key prefix", re: /AIza[0-9A-Za-z_-]{30,}/ },
   { name: "ANTHROPIC_API_KEY name", re: /ANTHROPIC_API_KEY/ },
   { name: "GEMINI_API_KEY name", re: /GEMINI_API_KEY/ },
+  { name: "Groq key prefix", re: /gsk_[A-Za-z0-9]{20,}/ },
+  { name: "OPENAI_COMPAT_API_KEY name", re: /OPENAI_COMPAT_API_KEY/ },
   { name: "SESSION_SECRET name", re: /SESSION_SECRET/ },
 ];
-for (const v of ["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "SESSION_SECRET", "DATABASE_AUTH_TOKEN"]) {
+for (const v of ["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_COMPAT_API_KEY", "SESSION_SECRET", "DATABASE_AUTH_TOKEN"]) {
   const val = process.env[v];
   if (val && val.length >= 8) needles.push({ name: `value of ${v}`, re: new RegExp(val.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) });
 }
