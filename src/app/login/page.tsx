@@ -9,7 +9,6 @@ export const metadata = { title: "Sign in" };
 
 export default async function LoginPage() {
   if (await getActor()) redirect("/app");
-  const showDemo = process.env.NODE_ENV !== "production" || process.env.SHOW_DEMO_LOGINS === "1";
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="hidden flex-col justify-between bg-navy-900 p-10 text-white lg:flex">
@@ -39,19 +38,6 @@ export default async function LoginPage() {
             </Link>
           </p>
           <LoginForm />
-          {showDemo && (
-            <div className="mt-8 rounded-lg border border-line bg-white p-4 text-sm">
-              <p className="font-medium text-ink">Demo accounts (local demonstration only)</p>
-              <table className="mt-2 w-full text-left text-[13px]">
-                <tbody className="divide-y divide-line">
-                  <tr><td className="py-1.5 pr-2 text-muted">Institution</td><td className="py-1.5">inst1@demo.smartvalidate.test</td><td className="py-1.5 pl-2">Institution@2026</td></tr>
-                  <tr><td className="py-1.5 pr-2 text-muted">Officer</td><td className="py-1.5">officer1@demo.smartvalidate.test</td><td className="py-1.5 pl-2">Officer@2026</td></tr>
-                  <tr><td className="py-1.5 pr-2 text-muted">Admin</td><td className="py-1.5">admin@demo.smartvalidate.test</td><td className="py-1.5 pl-2">Admin@2026</td></tr>
-                </tbody>
-              </table>
-              <p className="mt-2 text-xs text-muted">inst2–inst5 and officer2 use the same passwords. Hidden in production unless SHOW_DEMO_LOGINS=1.</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
