@@ -153,7 +153,6 @@ Vercel's serverless functions have no persistent disk, so a local SQLite file an
    MAX_UPLOAD_MB=4            # Vercel limits request bodies to ~4.5 MB
    GEMINI_API_KEY=…           # optional
    GEMINI_MODEL=…             # optional
-   SHOW_DEMO_LOGINS=1         # optional: show the demo-account table on the login page
    ```
 5. Deploy. Sign in and check **System health**.
 
