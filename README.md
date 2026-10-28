@@ -83,6 +83,19 @@ Free-tier limits are small (a few requests per minute). Each validation makes on
 
 Create a key in the Anthropic Console (billed separately from a claude.ai subscription), then set `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL` (model ID from <https://docs.claude.com>). If both providers are configured, `AI_PROVIDER=auto` prefers Gemini; set `AI_PROVIDER=anthropic` to force Claude.
 
+### Option C — Groq or any OpenAI-compatible API (free tier, higher limits)
+
+1. Create a free key at <https://console.groq.com/keys>.
+2. In `.env.local`:
+   ```
+   AI_PROVIDER=openai_compat
+   OPENAI_COMPAT_API_KEY=your-key
+   OPENAI_COMPAT_MODEL=a-model-id-from-console.groq.com/docs/models
+   ```
+3. Restart (`npm run dev`) and use **System health → Test AI connection**.
+
+`OPENAI_COMPAT_BASE_URL` defaults to Groq; set it to `https://openrouter.ai/api/v1` (OpenRouter, models ending in `:free`) or `https://api.cerebras.ai/v1` (Cerebras) to use those instead. Replies use JSON mode and are validated against the same Zod schemas as the other providers.
+
 ### Modes
 
 | Mode | When | What you see |

@@ -40,6 +40,8 @@ describe("AI configuration and mode resolution", () => {
   it("Gemini preferred in auto mode; Anthropic when only it is configured", () => {
     expect(resolveAiConfig({ GEMINI_API_KEY: "k", GEMINI_MODEL: "m", ANTHROPIC_API_KEY: "a", ANTHROPIC_MODEL: "b" }).provider).toBe("gemini");
     expect(resolveAiConfig({ ANTHROPIC_API_KEY: "a", ANTHROPIC_MODEL: "b" }).provider).toBe("anthropic");
+    expect(resolveAiConfig({ OPENAI_COMPAT_API_KEY: "o", OPENAI_COMPAT_MODEL: "m" }).provider).toBe("openai_compat");
+    expect(resolveAiConfig({ AI_PROVIDER: "openai_compat", OPENAI_COMPAT_API_KEY: "o" }).provider).toBe("mock");
     expect(resolveAiConfig({ AI_PROVIDER: "mock", GEMINI_API_KEY: "k", GEMINI_MODEL: "m" }).provider).toBe("mock");
   });
   it("getAiStatus reports DEMO when unconfigured", async () => {

@@ -3,7 +3,7 @@ import "server-only";
 // Nothing in here is ever returned to the browser; errors are classified into safe codes.
 import { GoogleGenAI, ApiError as GeminiApiError } from "@google/genai";
 import Anthropic from "@anthropic-ai/sdk";
-import type { AiConfig } from "./config";
+import { DEFAULT_OPENAI_COMPAT_BASE_URL, type AiConfig } from "./config";
 
 export interface RawCompletion {
   text: string;
@@ -123,6 +123,51 @@ export async function completeJson(
     } catch (err) {
       throw new AiProviderError(classifyError(err), "anthropic request failed");
     }
+  }
+
+  if (cfg.provider === "openai_compat") {
+    const key = process.env.OPENAI_COMPAT_API_KEY;
+    if (!key) throw new AiProviderError("missing_credentials", "missing key");
+    const baseUrl = (process.env.OPENAI_COMPAT_BASE_URL || DEFAULT_OPENAI_COMPAT_BASE_URL).replace(/\/+$/, "");
+    // JSON mode (not strict json_schema) is the widely supported subset across Groq / OpenRouter / Cerebras,
+    // so the schema goes in the system prompt and the reply is still Zod-validated by the caller.
+    const systemWithSchema = `${system}\n\nRespond with a single JSON object that conforms to this JSON Schema:\n${JSON.stringify(jsonSchema)}`;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt <= cfg.maxRetries; attempt++) {
+      try {
+        const res = await fetch(`${baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: cfg.model,
+            messages: [
+              { role: "system", content: systemWithSchema },
+              { role: "user", content: user },
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0,
+            max_tokens: cfg.maxOutputTokens,
+          }),
+          signal: AbortSignal.timeout(cfg.timeoutMs),
+        });
+        if (!res.ok) throw Object.assign(new Error(`openai-compatible request failed (${res.status})`), { status: res.status });
+        const data = (await res.json()) as {
+          choices?: { message?: { content?: string | null } }[];
+          usage?: { prompt_tokens?: number; completion_tokens?: number };
+        };
+        return {
+          text: data.choices?.[0]?.message?.content ?? "",
+          inputTokens: data.usage?.prompt_tokens ?? null,
+          outputTokens: data.usage?.completion_tokens ?? null,
+        };
+      } catch (err) {
+        lastErr = err;
+        const code = classifyError(err);
+        if (!["rate_limited", "provider_unavailable", "network"].includes(code) || attempt === cfg.maxRetries) break;
+        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+      }
+    }
+    throw new AiProviderError(classifyError(lastErr), "openai-compatible request failed");
   }
 
   throw new AiProviderError("missing_credentials", "mock provider has no remote completion");

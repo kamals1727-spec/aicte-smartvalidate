@@ -1,7 +1,10 @@
 // Which AI provider is active is decided ONLY from server-side environment variables.
 // Keys are read here and in the provider clients — never exported to client code or logs.
 
-export type ProviderName = "gemini" | "anthropic" | "mock";
+export type ProviderName = "gemini" | "anthropic" | "openai_compat" | "mock";
+
+/** Default endpoint for the OpenAI-compatible provider (Groq's free tier). */
+export const DEFAULT_OPENAI_COMPAT_BASE_URL = "https://api.groq.com/openai/v1";
 
 export interface AiConfig {
   provider: ProviderName;
@@ -31,6 +34,7 @@ export function resolveAiConfig(env: Record<string, string | undefined> = proces
   const choice = (env.AI_PROVIDER || "auto").toLowerCase();
   const gemini = Boolean(env.GEMINI_API_KEY && env.GEMINI_MODEL);
   const anthropic = Boolean(env.ANTHROPIC_API_KEY && env.ANTHROPIC_MODEL);
+  const openaiCompat = Boolean(env.OPENAI_COMPAT_API_KEY && env.OPENAI_COMPAT_MODEL);
 
   const mock = (reason: string): AiConfig => ({ ...base, provider: "mock", model: "deterministic-demo", configured: false, reason });
 
@@ -42,6 +46,10 @@ export function resolveAiConfig(env: Record<string, string | undefined> = proces
   if (choice === "anthropic" || (choice === "auto" && anthropic)) {
     if (!anthropic) return mock("AI_PROVIDER=anthropic but ANTHROPIC_API_KEY or ANTHROPIC_MODEL is missing.");
     return { ...base, provider: "anthropic", model: env.ANTHROPIC_MODEL!, configured: true, reason: "Anthropic Claude configured." };
+  }
+  if (choice === "openai_compat" || (choice === "auto" && openaiCompat)) {
+    if (!openaiCompat) return mock("AI_PROVIDER=openai_compat but OPENAI_COMPAT_API_KEY or OPENAI_COMPAT_MODEL is missing.");
+    return { ...base, provider: "openai_compat", model: env.OPENAI_COMPAT_MODEL!, configured: true, reason: "OpenAI-compatible provider configured." };
   }
   return mock("No AI API key and model configured — running in DEMO mode.");
 }
